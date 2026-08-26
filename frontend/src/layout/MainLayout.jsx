@@ -5,7 +5,7 @@ export default function MainLayout({children}){
     return(
         <>
         <Navbar/>
-        <main>
+        <main className="pt-23">
             {children}
         </main>
         <Footer/>
