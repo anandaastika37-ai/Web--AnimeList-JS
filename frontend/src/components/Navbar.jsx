@@ -23,7 +23,7 @@ export default function Navbar(){
                             <li className="hover:bg-purple-600 py-2 px-3 rounded-md transition-all ease-in duration-100"><a href="/">Home</a></li>
                             <li className="hover:bg-purple-600 py-2 px-3 rounded-md transition-all ease-in duration-100"><a href="/browse">Browse</a></li>
                             <li className="hover:bg-purple-600 py-2 px-3 rounded-md transition-all ease-in duration-100"><a href="/category">Category</a></li>
-                            <li className="hover:bg-purple-600 py-2 px-3 rounded-md transition-all ease-in duration-100"><a href="/rankings">Rangkings</a></li>
+                            <li className="hover:bg-purple-600 py-2 px-3 rounded-md transition-all ease-in duration-100"><a href="/ranking">Rangkings</a></li>
                         </ul>
                     </div>
                     <div className="user-login flex items-center justify-center gap-3">
@@ -76,7 +76,7 @@ export default function Navbar(){
                     <a href="/category" aria-label="Category" className="w-10 h-10 flex items-center justify-center text-white hover:bg-purple-600 rounded-lg transition-all ease-in duration-100">
                         <FontAwesomeIcon icon={faLayerGroup}/>
                     </a>
-                    <a href="/rangking" aria-label="Rangkings" className="w-10 h-10 flex items-center justify-center text-white hover:bg-purple-600 rounded-lg transition-all ease-in duration-100">
+                    <a href="/ranking" aria-label="Rangkings" className="w-10 h-10 flex items-center justify-center text-white hover:bg-purple-600 rounded-lg transition-all ease-in duration-100">
                         <FontAwesomeIcon icon={faTrophy}/>
                     </a>
                 </div>
