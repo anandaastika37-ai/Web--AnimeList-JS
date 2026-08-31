@@ -27,7 +27,7 @@ export default function Navbar(){
                         </ul>
                     </div>
                     <div className="user-login flex items-center justify-center gap-3">
-                        <button className="bg-blue-600 text-white hover:bg-purple-900 px-4 py-2 rounded-md text-sm font-medium "><a href="">Login</a></button>
+                        <button className="bg-blue-600 text-white hover:bg-purple-900 px-4 py-2 rounded-md text-sm font-medium "><a href="/login">Login</a></button>
                         <span className="w-10 h-10 rounded-full border-2 border-white cursor-pointer hover:border-white/60 hidden">
                                 <img src={profile} alt="profile" className=" hover:brightness-50 rounded-full"/>
                         </span>
@@ -37,7 +37,7 @@ export default function Navbar(){
                 {/* Login + hamburger berdampingan, khusus mobile */}
                 <div className="flex lg:hidden items-center gap-3">
                     <button className="bg-blue-600 text-white hover:bg-purple-900 px-3 py-1.5 rounded-md text-sm font-medium">
-                        <a href="">Login</a>
+                        <a href="/login">Login</a>
                     </button>
                     <button
                         className="text-white text-2xl w-8 h-8 flex items-center justify-center rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
