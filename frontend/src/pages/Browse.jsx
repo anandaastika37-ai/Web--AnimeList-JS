@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import MainLayout from "../layout/MainLayout.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -10,17 +11,39 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark, faHeart } from "@fortawesome/free-regular-svg-icons";
 import AnimeCard from "../components/AnimeCard.jsx";
-import AnimeList from "../data/animeList.json";
 import imgTest from "../assets/imgTest.jpg";
 const seeMoreClass =
   "text-purple-600 text-xs sm:text-sm font-semibold flex items-center gap-1 hover:text-purple-800 transition-colors";
 
-function getRecommendedAnime() {
-  return [...AnimeList].sort((a, b) => b.rating - a.rating).slice(0, 15);
-}
 
 export default function Browse() {
-  const recommended = getRecommendedAnime();
+  const [animeList, setAnimeList] = useState([]);
+
+  useEffect(() => {
+    const dataAnime = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/anime");
+
+        if (!response.ok) {
+          throw new Error("Gagal mengambil data anime");
+        }
+
+        const data = await response.json();
+
+        console.log("Data dari MySQL:", data);
+
+        setAnimeList(data);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    dataAnime();
+  }, []);
+
+  const recommended = [...animeList]
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 15);
 
   return (
     <MainLayout>
@@ -82,7 +105,7 @@ export default function Browse() {
             </div>
           </div>
           <div className="card-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-            {AnimeList.map((anime) => (
+            {animeList.map((anime) => (
               <AnimeCard key={anime.id} {...anime} className="w-full" />
             ))}
           </div>
