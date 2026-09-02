@@ -8,42 +8,77 @@ import {
   faBuilding,
   faCompass,
   faMagnifyingGlass,
+  faCalendarCheck,
+  faCalendarDays,
+  faBook,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark, faHeart } from "@fortawesome/free-regular-svg-icons";
 import AnimeCard from "../components/AnimeCard.jsx";
 import imgTest from "../assets/imgTest.jpg";
+
 const seeMoreClass =
   "text-purple-600 text-xs sm:text-sm font-semibold flex items-center gap-1 hover:text-purple-800 transition-colors";
 
-
 export default function Browse() {
   const [animeList, setAnimeList] = useState([]);
+  const [countData, setCount] = useState(0);
+  const [animeRecomand, setRecomandAnime] = useState([]);
+  const [totalOngoing, setTotalOngoing] = useState(0);
+  const [totalCompleted, setTotalCompleted] = useState(0);
+  const [averageRating, setAverageRating] = useState(0);
 
   useEffect(() => {
     const dataAnime = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/anime");
-
         if (!response.ok) {
           throw new Error("Gagal mengambil data anime");
         }
-
         const data = await response.json();
-
         console.log("Data dari MySQL:", data);
-
         setAnimeList(data);
+        setCount(data.length);
+
+        const ongoingCount = data.filter(
+          (anime) => anime.status === "Ongoing",
+        ).length;
+        const completedCount = data.filter(
+          (anime) => anime.status === "Completed",
+        ).length;
+        const validRatings = data
+          .map((anime) => Number(anime.rating))
+          .filter((r) => !Number.isNaN(r) && r > 0); // buang null/undefined/rating 0 palsu
+
+        const totalRating = validRatings.reduce((total, r) => total + r, 0);
+        const average =
+          validRatings.length > 0 ? totalRating / validRatings.length : 0;
+
+        setAverageRating(average);
+        setTotalCompleted(completedCount);
+        setTotalOngoing(ongoingCount);
       } catch (error) {
         console.error("Error:", error);
       }
     };
-
     dataAnime();
   }, []);
 
-  const recommended = [...animeList]
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 15);
+  useEffect(() => {
+    const dataRecomand = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/recomand");
+        if (!response.ok) {
+          throw new Error("gagal mengambil data anime");
+        }
+        const dataAnime = await response.json();
+        console.log("Data dari MySql:", dataAnime);
+        setRecomandAnime(dataAnime);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+    dataRecomand();
+  }, []);
 
   return (
     <MainLayout>
@@ -112,43 +147,49 @@ export default function Browse() {
         </div>
 
         <div className="right w-full lg:w-[35%] lg:sticky lg:top-4 lg:self-start bg-white h-auto lg:h-[90vh] rounded-xl border border-gray-100 shadow-md">
-          <div className="statistic w-full p-4 sm:p-5 grid grid-cols-2 gap-3">
-            <div className="bg-linear-to-r from-violet-600 to-purple-600 rounded-2xl p-3 sm:p-4 shadow-sm">
+          <div className="statistic w-full h-70 p-4 sm:p-5 grid grid-cols-2 gap-2">
+            <div className="bg-linear-to-r from-violet-600 to-purple-600 rounded-2xl px-3 py-6 sm:p-4 shadow-sm">
               <span className="block text-[11px] sm:text-xs font-medium text-white/70">
                 Total Anime
               </span>
-              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white mt-2">
-                1,240
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mt-2 flex items-center gap-2">
+                <FontAwesomeIcon icon={faBook} className="text-white text-2xl"/>
+                {countData}
               </p>
             </div>
 
-            <div className="bg-linear-to-r from-purple-700 to-blue-600 rounded-2xl p-3 sm:p-4 shadow-sm">
+            <div className="bg-linear-to-r from-purple-700 to-blue-600 rounded-2xl px-3 py-6 sm:p-4 shadow-sm">
               <span className="block text-[11px] sm:text-xs font-medium text-white/70">
                 Anime Ongoing
               </span>
-              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white mt-2">
-                128
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mt-2 flex items-center gap-2">
+                <FontAwesomeIcon icon={faCalendarDays} className="text-white text-2xl"/>
+                {totalOngoing}
               </p>
             </div>
 
-            <div className="bg-linear-to-r from-indigo-700 to-blue-600 rounded-2xl p-3 sm:p-4 shadow-sm">
+            <div className="bg-linear-to-r from-indigo-700 to-blue-600 rounded-2xl px-3 py-6 sm:p-4 shadow-sm">
               <span className="block text-[11px] sm:text-xs font-medium text-white/70">
                 Anime Completed
               </span>
-              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white mt-2">
-                342
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mt-2 flex items-center gap-2">
+                <FontAwesomeIcon icon={faCalendarCheck} className="text-white text-2xl"/>
+                {totalCompleted}
               </p>
             </div>
 
-            <div className="bg-linear-to-r from-blue-600 to-cyan-500 rounded-2xl p-3 sm:p-4 shadow-sm">
+            <div className="bg-linear-to-r from-blue-600 to-cyan-500 rounded-2xl px-3 py-6 sm:p-4 shadow-sm">
               <span className="block text-[11px] sm:text-xs font-medium text-white/70">
                 Rata-rata Rating
               </span>
-              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white mt-2">
-                8.4
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mt-2 flex items-center gap-2">
+                  <FontAwesomeIcon
+                    icon={faStar}
+                    className="text-yellow-500 text-2xl"
+                  />
+                {averageRating.toFixed(1)}
               </p>
             </div>
-
           </div>
 
           <div className="flex flex-col gap-6 w-full py-4 px-4 sm:px-6">
@@ -165,13 +206,10 @@ export default function Browse() {
                   Dipilih berdasarkan anime yang sedang tren minggu ini
                 </p>
               </div>
-              {/* <a href="#" className={seeMoreClass}>
-                                See more <FontAwesomeIcon icon={faAnglesRight} />
-                            </a> */}
             </div>
 
-            <div className="w-[95%] mx-auto flex flex-col gap-2 h-[400px] sm:h-[450px] lg:h-[500px] overflow-y-auto pr-1">
-              {recommended.map((recomed) => (
+            <div className="w-[95%] mx-auto flex flex-col gap-2 h-[400px] sm:h-[450px] lg:h-[450px] overflow-y-auto pr-1">
+              {animeRecomand.map((recomed) => (
                 <div
                   key={recomed.id}
                   className="w-full flex gap-2 bg-linear-to-l hover:translate-x-1 ease-in transition-all duration-300 from-indigo-800 to-blue-600 border border-gray-200 p-1.5 rounded-lg hover:shadow-lg"

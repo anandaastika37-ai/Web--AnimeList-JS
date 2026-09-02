@@ -1,4 +1,4 @@
-import { getAllAnime } from "../model/animeModel.js";
+import { getAllAnime , getRecomandAnime } from "../model/DataAnime.js";
 
 export const getAnime = (req, res) => {
   getAllAnime((err, results) => {
@@ -13,3 +13,19 @@ export const getAnime = (req, res) => {
     res.json(results);
   });
 };
+
+
+export const getRecomand = (req , res) => {
+  getRecomandAnime((err , results) => {
+    if(err){
+      console.error("Gagal mengambil data anime :" , err);
+
+      return res.status(500).json({
+        masesage : "gagal mengambil data anime"
+      })
+    }
+
+    res.json(results)
+  })
+}
+

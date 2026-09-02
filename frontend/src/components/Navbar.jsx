@@ -10,7 +10,7 @@ export default function Navbar(){
 
     return(
         <>
-            <nav className="nav-container fixed z-10  w-full h-17 flex items-center justify-between px-4 md:px-6 lg:px-8 bg-linear-to-l from-indigo-900 to-indigo-950">
+            <nav className="nav-container fixed z-20  w-full h-17 flex items-center justify-between px-4 md:px-6 lg:px-8 bg-linear-to-l from-indigo-900 to-indigo-950">
                 <a href="/" className="Logo cursor-pointer text-white text-xl flex items-center gap-2 md:gap-4">
                     <img src={logoAnimeList} alt="" className="w-8 h-8"/>
                     <h2 className="font-montserrat font-bold text-lg md:text-xl">Anime<span className="text-sky-200">List</span></h2>

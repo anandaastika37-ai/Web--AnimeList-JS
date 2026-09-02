@@ -1,13 +1,24 @@
 import db from "../database/connect.js";
 
 export const getAllAnime = (callback) => {
-  const sql = "SELECT * FROM anime_list";
+  const sql = "SELECT * FROM data_anime";
 
   db.query(sql, (err, results) => {
     if (err) {
       return callback(err, null);
     }
-
     callback(null, results);
   });
 };
+
+export const getRecomandAnime = (callback) => {
+  const sql =  "SELECT * FROM data_anime ORDER BY rating DESC LIMIT 10";
+
+  db.query(sql , (err , results) => {
+    if(err){
+      return callback(err, null);
+    }
+    callback(null, results);
+  })
+}
+
