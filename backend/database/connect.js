@@ -16,4 +16,7 @@ db.connect((err) => {
     console.log("MySql berhasil terhubung");
 })
 
+
+
+
 export default db;

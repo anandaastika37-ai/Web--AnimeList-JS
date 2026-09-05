@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MainLayout from "../layout/MainLayout.jsx";
 import {
@@ -8,7 +8,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import SideBar from "../components/SidebarCategory.jsx";
 import AnimeCard from "../components/AnimeCard.jsx";
-import AnimeList from "../data/animeList.json";
 
 // Handles anime.genre as either a string ("Action, Comedy") or an array (["Action","Comedy"])
 function getGenres(anime) {
@@ -19,12 +18,41 @@ function getGenres(anime) {
 }
 
 export default function CategoryPage() {
+  const [animeList, setAnimeList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("latest");
   const [selectedCategory, setSelectedCategory] = useState(null);
 
+  // Ambil data anime dari backend — endpoint sama dengan yang dipakai
+  // di halaman Browse, supaya datanya konsisten di seluruh app
+  useEffect(() => {
+    const fetchAnime = async () => {
+      try {
+        setIsLoading(true);
+        setLoadError(null);
+
+        const response = await fetch("http://localhost:3000/api/anime");
+        if (!response.ok) {
+          throw new Error("Gagal mengambil data anime");
+        }
+        const data = await response.json();
+        setAnimeList(data);
+      } catch (error) {
+        console.error("Error:", error);
+        setLoadError("Gagal memuat data anime dari server.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAnime();
+  }, []);
+
   const filteredAnime = useMemo(() => {
-    let result = [...AnimeList];
+    let result = [...animeList];
 
     // Filter by selected sidebar category
     if (selectedCategory) {
@@ -39,7 +67,7 @@ export default function CategoryPage() {
     if (search.trim()) {
       const query = search.trim().toLowerCase();
       result = result.filter((anime) =>
-        anime.title.toLowerCase().includes(query)
+        anime.title?.toLowerCase().includes(query)
       );
     }
 
@@ -60,7 +88,7 @@ export default function CategoryPage() {
     }
 
     return result;
-  }, [search, sortBy, selectedCategory]);
+  }, [animeList, search, sortBy, selectedCategory]);
 
   return (
     <MainLayout>
@@ -129,7 +157,15 @@ export default function CategoryPage() {
 
         {/* Content: card grid */}
         <div className="content w-[85%] px-8 py-6">
-          {filteredAnime.length > 0 ? (
+          {isLoading ? (
+            <div className="w-full py-16 flex flex-col items-center justify-center text-center text-gray-500">
+              <p className="font-medium">Memuat data anime...</p>
+            </div>
+          ) : loadError ? (
+            <div className="w-full py-16 flex flex-col items-center justify-center text-center text-red-500">
+              <p className="font-medium">{loadError}</p>
+            </div>
+          ) : filteredAnime.length > 0 ? (
             <>
               <p className="text-sm text-gray-500 mb-4">
                 Menampilkan {filteredAnime.length} anime

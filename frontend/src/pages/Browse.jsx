@@ -300,7 +300,7 @@ export default function Browse() {
                   className="w-full flex gap-2 bg-linear-to-l hover:translate-x-1 ease-in transition-all duration-300 from-indigo-800 to-blue-600 border border-gray-200 p-1.5 rounded-lg hover:shadow-lg"
                 >
                   <img
-                    src={imgTest}
+                    src={recomed.image}
                     alt={recomed.title}
                     className="w-14 h-20 sm:w-16 sm:h-24 object-cover rounded-md shrink-0"
                   />
