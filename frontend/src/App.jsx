@@ -17,7 +17,7 @@ export default function App() {
             <Route path="/browse" element={<Browse />} />
             <Route path="/category" element={<CategoryPage />} />
             <Route path="/ranking" element={<RankingPage />} />
-            <Route path="/detail" element={<Detail />} />
+            <Route path="/anime/:id" element={<Detail />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/upcoming-anime" element={<UpcomingAnimePage />} />

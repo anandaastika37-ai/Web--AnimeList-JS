@@ -19,7 +19,9 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", animeRoutes);
+app.use("/api/anime", animeRoutes);
 
 app.listen(3000, () => {
   console.log("Server berjalan di http://localhost:3000");
 });
+

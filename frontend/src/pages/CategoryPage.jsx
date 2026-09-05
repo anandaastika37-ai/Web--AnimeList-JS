@@ -10,12 +10,30 @@ import SideBar from "../components/SidebarCategory.jsx";
 import AnimeCard from "../components/AnimeCard.jsx";
 import AnimeList from "../data/animeList.json";
 
+// Handles anime.genre as either a string ("Action, Comedy") or an array (["Action","Comedy"])
+function getGenres(anime) {
+  if (Array.isArray(anime.genre)) return anime.genre;
+  if (typeof anime.genre === "string") return anime.genre.split(",").map((g) => g.trim());
+  if (Array.isArray(anime.genres)) return anime.genres;
+  return [];
+}
+
 export default function CategoryPage() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("latest");
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const filteredAnime = useMemo(() => {
     let result = [...AnimeList];
+
+    // Filter by selected sidebar category
+    if (selectedCategory) {
+      result = result.filter((anime) =>
+        getGenres(anime).some(
+          (g) => g.toLowerCase() === selectedCategory.toLowerCase()
+        )
+      );
+    }
 
     // Filter by search
     if (search.trim()) {
@@ -34,26 +52,30 @@ export default function CategoryPage() {
         result.sort((a, b) => b.title.localeCompare(a.title));
         break;
       case "oldest":
-        result.reverse(); // sesuaikan kalau ada field tanggal seperti "year"
+        result.reverse();
         break;
       case "latest":
       default:
-        // urutan bawaan dari animeList.json dianggap terbaru dulu
         break;
     }
 
     return result;
-  }, [search, sortBy]);
+  }, [search, sortBy, selectedCategory]);
 
   return (
     <MainLayout>
-      <SideBar />
+      <SideBar selected={selectedCategory} onSelect={setSelectedCategory} />
       <div className="w-full h-auto pt-17 flex flex-col items-end">
         <div className="header w-[85%] border border-gray-200 bg-white px-8 py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h2 className="font-semibold text-xl text-gray-800 flex items-center gap-2">
               <FontAwesomeIcon icon={faPuzzlePiece} className="text-blue-800" />
               Category
+              {selectedCategory && (
+                <span className="text-sm font-normal text-gray-500">
+                  — {selectedCategory}
+                </span>
+              )}
             </h2>
             <p className="text-sm text-gray-600">
               Discover anime by genre and find your next favorite series.

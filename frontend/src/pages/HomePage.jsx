@@ -17,90 +17,11 @@ import {
 import { faBookmark } from "@fortawesome/free-regular-svg-icons";
 import imgTest from "../assets/imgTest.jpg";
 import AnimeCard from "../components/AnimeCard.jsx";
-import AnimeList from "../data/animeList.json";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 
 const seeMoreClass =
   "text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 transition-colors text-sm sm:text-base shrink-0";
-function animePopuler() {
-  // Top 4 rating tertinggi
-  return [...AnimeList].sort((a, b) => b.rating - a.rating).slice(0, 4);
-}
-function upcomingAnime() {
-  // 10 Data dummy statis untuk Anime Upcoming
-  return [
-    {
-      title: "Solo Leveling Season 2: Arise",
-      genres: ["Action", "Adventure"],
-      rating: "N/A",
-      status: "Upcoming",
-      image: imgTest,
-    },
-    {
-      title: "Demon Slayer: Infinity Castle Arc",
-      genres: ["Action", "Supernatural"],
-      rating: "N/A",
-      status: "Upcoming",
-      image: imgTest,
-    },
-    {
-      title: "Re:Zero 3rd Season",
-      genres: ["Drama", "Fantasy"],
-      rating: "N/A",
-      status: "Upcoming",
-      image: imgTest,
-    },
-    {
-      title: "One Punch Man Season 3",
-      genres: ["Action", "Comedy"],
-      rating: "N/A",
-      status: "Upcoming",
-      image: imgTest,
-    },
-    {
-      title: "Bleach: Thousand-Year Blood War 3",
-      genres: ["Action", "Supernatural"],
-      rating: "N/A",
-      status: "Upcoming",
-      image: imgTest,
-    },
-    {
-      title: "Jujutsu Kaisen Season 3",
-      genres: ["Action", "Fantasy"],
-      rating: "N/A",
-      status: "Upcoming",
-      image: imgTest,
-    },
-    {
-      title: "Chainsaw Man - The Movie: Reze Arc",
-      genres: ["Action", "Horror"],
-      rating: "N/A",
-      status: "Upcoming",
-      image: imgTest,
-    },
-    {
-      title: "Spy x Family Season 3",
-      genres: ["Comedy", "Action"],
-      rating: "N/A",
-      status: "Upcoming",
-      image: imgTest,
-    },
-    {
-      title: "Dr. Stone: Science Future",
-      genres: ["Sci-Fi", "Adventure"],
-      rating: "N/A",
-      status: "Upcoming",
-      image: imgTest,
-    },
-    {
-      title: "KonoSuba Season 4",
-      genres: ["Comedy", "Fantasy"],
-      rating: "N/A",
-      status: "Upcoming",
-      image: imgTest,
-    },
-  ];
-}
 
 export default function HomePage() {
   const colorLinear = [
@@ -133,8 +54,14 @@ export default function HomePage() {
     "Supernatural",
   ];
 
+  const [allAnime, setAllAnime] = useState([]);
   const [newAnime, setAnime] = useState([]);
-  const [animeUpcoming , setAnimeUpcoming] = useState([]);
+  const [animeUpcoming, setAnimeUpcoming] = useState([]);
+  const navigate = useNavigate();
+
+  const handleDetail = (animeId) => {
+    navigate(`/anime/${animeId}`);
+  };
 
   useEffect(() => {
     const dataAnime = async () => {
@@ -144,16 +71,15 @@ export default function HomePage() {
           throw new Error("Gagal Mengambil Data Anime");
         }
         const data = await response.json();
-        console.log("Data dari MySQL semua anime:", data);
-        const upcomingAnime = data.filter((anime) => {
-            const status = anime.status
-            return status === "Upcoming"
-        }).slice(0 , 10)
+        setAllAnime(data); // simpan semua data untuk dipakai Top 4 Terpopuler
+
+        const upcomingAnime = data
+          .filter((anime) => anime.status === "Upcoming")
+          .slice(0, 10);
 
         const latestAnime = data
           .filter((anime) => {
             const aired = anime.aired?.split(" - ");
-
             return aired?.[1] === "Present";
           })
           .sort((a, b) => {
@@ -162,17 +88,22 @@ export default function HomePage() {
             return dateB - dateA;
           })
           .slice(0, 6);
-          console.log(latestAnime)
-          console.log(upcomingAnime)
+
         setAnimeUpcoming(upcomingAnime);
         setAnime(latestAnime);
-      } catch {
+      } catch (error) {
         console.error("Error:", error);
       }
     };
     dataAnime();
   }, []);
- 
+
+  // Top 4 Terpopuler dihitung dari data live API (bukan JSON statis)
+  const topAnime = useMemo(() => {
+    return [...allAnime]
+      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+      .slice(0, 4);
+  }, [allAnime]);
 
   return (
     <MainLayout>
@@ -264,6 +195,7 @@ export default function HomePage() {
               <AnimeCard
                 key={anime.id}
                 {...anime}
+                onClick={() => handleDetail(anime.id)}
                 className="w-48 sm:w-56 md:w-64"
               />
             ))}
@@ -293,14 +225,14 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {animePopuler().map((top, index) => (
+              {topAnime.map((top, index) => (
                 <a
-                  key={top.title}
-                  href={`/anime/${top.title}`}
+                  key={top.id}
+                  href={`/anime/${top.id}`}
                   className={`${colorLinear[index]} group hover:shadow-xl p-3 rounded-xl hover:-translate-y-1 ease-in transition-all duration-300 flex gap-4`}
                 >
                   <img
-                    src={imgTest}
+                    src={top.image || imgTest}
                     alt={top.title}
                     className="w-32 sm:w-36 md:w-40 h-auto object-cover rounded-lg shrink-0 shadow-sm group-hover:shadow-md transition-shadow"
                   />
@@ -332,10 +264,10 @@ export default function HomePage() {
                             icon={faStar}
                             className="text-yellow-300"
                           />{" "}
-                          {top.rating}
+                          {top.rating ?? "-"}
                         </span>
                         <span className="opacity-50">|</span>
-                        <span className="font-medium">{top.episodes} Eps</span>
+                        <span className="font-medium">{top.episodes ?? "-"} Eps</span>
                       </div>
                       <h4 className="text-xs sm:text-sm font-normal truncate opacity-90">
                         <FontAwesomeIcon icon={faBuilding} className="mr-1" />{" "}
@@ -357,22 +289,21 @@ export default function HomePage() {
                 </div>
                 Anime Upcoming
               </h3>
-            <a href="/upcoming-anime" className={seeMoreClass}>
-              Lihat Semua <FontAwesomeIcon icon={faAnglesRight} />
-            </a>
+              <a href="/upcoming-anime" className={seeMoreClass}>
+                Lihat Semua <FontAwesomeIcon icon={faAnglesRight} />
+              </a>
             </div>
 
             {/* Menambahkan scrollbar agar layout tidak bablas ke bawah karena ada 10 data */}
             <div className="flex flex-col gap-3 max-h-[480px] overflow-y-auto pr-2 custom-scrollbar">
               {animeUpcoming.map((anime) => (
                 <a
-                  key={anime.title}
-                  href={`/anime/${anime.title}`}
-                  // Menggunakan gradien yang senada dengan tema web (Blue/Indigo)
+                  key={anime.id}
+                  href={`/anime/${anime.id}`}
                   className="flex gap-4 items-center p-3 rounded-xl bg-gradient-to-r from-blue-900 to-indigo-900 hover:from-blue-800 hover:to-indigo-800 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 border border-indigo-700/50 group"
                 >
                   <img
-                    src={imgTest}
+                    src={anime.image || imgTest}
                     alt={anime.title}
                     className="w-16 h-20 object-cover rounded-md shadow-sm border border-white/10"
                   />
@@ -384,10 +315,12 @@ export default function HomePage() {
                       {anime.genres?.slice(0, 2).join(", ")}
                     </div>
                     <div className="flex items-center gap-2 text-xs font-semibold">
-                        <span className="text-white font-montserrat"><FontAwesomeIcon icon={faBuilding} />{anime.studio}</span>
-                        <span className="text-indigo-400">•</span>
+                      <span className="text-white font-montserrat">
+                        <FontAwesomeIcon icon={faBuilding} /> {anime.studio}
+                      </span>
+                      <span className="text-indigo-400">•</span>
                       <span className="text-white">
-                        <FontAwesomeIcon icon={faFolderOpen} /> {anime.source} 
+                        <FontAwesomeIcon icon={faFolderOpen} /> {anime.source}
                       </span>
                       <span className="text-indigo-400">•</span>
                       <span className="text-white bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-md border border-white/20">

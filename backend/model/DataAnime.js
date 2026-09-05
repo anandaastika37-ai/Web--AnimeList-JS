@@ -22,3 +22,16 @@ export const getRecomandAnime = (callback) => {
   })
 }
 
+export const getDetail = (id, callback) => {
+  const sql = "SELECT * FROM data_anime WHERE id = ?";
+
+  db.query(sql, [id], (err, results) => {
+    if (err) {
+      return callback(err, null);
+    }
+
+    callback(null, results);
+  });
+};
+
+

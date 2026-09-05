@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import MainLayout from "../layout/MainLayout.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faAnglesRight,
   faThumbsUp,
   faStar,
   faBuilding,
@@ -15,17 +14,28 @@ import {
 import { faBookmark, faHeart } from "@fortawesome/free-regular-svg-icons";
 import AnimeCard from "../components/AnimeCard.jsx";
 import imgTest from "../assets/imgTest.jpg";
+import { useNavigate } from "react-router-dom";
 
 const seeMoreClass =
   "text-purple-600 text-xs sm:text-sm font-semibold flex items-center gap-1 hover:text-purple-800 transition-colors";
 
 export default function Browse() {
+  const navigate = useNavigate();
   const [animeList, setAnimeList] = useState([]);
   const [countData, setCount] = useState(0);
   const [animeRecomand, setRecomandAnime] = useState([]);
   const [totalOngoing, setTotalOngoing] = useState(0);
   const [totalCompleted, setTotalCompleted] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
+
+  // filter & sort state
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sortBy, setSortBy] = useState("latest");
+
+  const handleDetail = (animeId) => {
+    navigate(`/anime/${animeId}`);
+  };
 
   useEffect(() => {
     const dataAnime = async () => {
@@ -47,7 +57,7 @@ export default function Browse() {
         ).length;
         const validRatings = data
           .map((anime) => Number(anime.rating))
-          .filter((r) => !Number.isNaN(r) && r > 0); // buang null/undefined/rating 0 palsu
+          .filter((r) => !Number.isNaN(r) && r > 0);
 
         const totalRating = validRatings.reduce((total, r) => total + r, 0);
         const average =
@@ -80,6 +90,56 @@ export default function Browse() {
     dataRecomand();
   }, []);
 
+  // Filtering + sorting dilakukan di client dari animeList yang sudah di-fetch
+  const filteredAnime = useMemo(() => {
+    let result = [...animeList];
+
+    // Search by title
+    if (search.trim()) {
+      const query = search.trim().toLowerCase();
+      result = result.filter((anime) =>
+        anime.title?.toLowerCase().includes(query)
+      );
+    }
+
+    // Filter by status
+    if (statusFilter) {
+      result = result.filter((anime) => anime.status === statusFilter);
+    }
+
+    // Sort
+    switch (sortBy) {
+      case "oldest":
+        result.reverse();
+        break;
+      case "rating":
+        result.sort((a, b) => Number(b.rating ?? 0) - Number(a.rating ?? 0));
+        break;
+      case "popular":
+        result.sort(
+          (a, b) => Number(b.popularity ?? b.views ?? 0) - Number(a.popularity ?? a.views ?? 0)
+        );
+        break;
+      case "favorite":
+        result.sort(
+          (a, b) => Number(b.favorites ?? b.favoriteCount ?? 0) - Number(a.favorites ?? a.favoriteCount ?? 0)
+        );
+        break;
+      case "az":
+        result.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case "za":
+        result.sort((a, b) => b.title.localeCompare(a.title));
+        break;
+      case "latest":
+      default:
+        // urutan bawaan dari API dianggap terbaru dulu
+        break;
+    }
+
+    return result;
+  }, [animeList, search, statusFilter, sortBy]);
+
   return (
     <MainLayout>
       <div className="browse-container pt-24 px-2 pb-2 sm:px-4 sm:pb-4 w-full flex flex-col lg:flex-row gap-4">
@@ -107,6 +167,8 @@ export default function Browse() {
                   />
                   <input
                     type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search anime..."
                     className="pl-9 pr-4 py-2 w-full sm:w-56 rounded-lg border border-gray-300 bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-500"
                   />
@@ -115,18 +177,24 @@ export default function Browse() {
                 <select
                   name="status"
                   id="status"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                   className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="">All Status</option>
-                  <option value="Currently Airing">Ongoing</option>
-                  <option value="Finished Airing">Completed</option>
+                  <option value="Ongoing">Ongoing</option>
+                  <option value="Completed">Completed</option>
                 </select>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
                   <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
                     Sort By
                   </span>
-                  <select className="flex-1 sm:flex-none px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
                     <option value="latest">Latest</option>
                     <option value="oldest">Oldest</option>
                     <option value="rating">Highest Rated</option>
@@ -139,11 +207,28 @@ export default function Browse() {
               </div>
             </div>
           </div>
-          <div className="card-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-            {animeList.map((anime) => (
-              <AnimeCard key={anime.id} {...anime} className="w-full" />
-            ))}
-          </div>
+
+          {filteredAnime.length > 0 ? (
+            <div className="card-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+              {filteredAnime.map((anime) => (
+                <AnimeCard
+                  key={anime.id}
+                  {...anime}
+                  onClick={() => handleDetail(anime.id)}
+                  className="w-full"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="w-full py-16 flex flex-col items-center justify-center text-center text-gray-500">
+              <FontAwesomeIcon
+                icon={faMagnifyingGlass}
+                className="text-3xl mb-3 text-gray-300"
+              />
+              <p className="font-medium">Anime tidak ditemukan</p>
+              <p className="text-sm">Coba kata kunci pencarian yang lain.</p>
+            </div>
+          )}
         </div>
 
         <div className="right w-full lg:w-[35%] lg:sticky lg:top-4 lg:self-start bg-white h-auto lg:h-[90vh] rounded-xl border border-gray-100 shadow-md">
@@ -224,7 +309,7 @@ export default function Browse() {
                       {recomed.title}
                     </h2>
                     <ul className="flex flex-wrap gap-1">
-                      {recomed.genres.slice(0, 2).map((genre) => (
+                      {(recomed.genres ?? []).slice(0, 2).map((genre) => (
                         <li
                           key={genre}
                           className="border border-gray-300 text-[9px] rounded-md py-0.5 px-1"

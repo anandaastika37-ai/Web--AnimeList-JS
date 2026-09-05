@@ -16,6 +16,7 @@ export default function AnimeCard({
     liked = false,
     onSave,
     onLike,
+    onClick,
     className
 }) {
     const [isSaved, setIsSaved] = useState(saved);
@@ -37,15 +38,23 @@ export default function AnimeCard({
         onLike?.(next);
     }
 
+    function handleCardClick(e) {
+        if (onClick) {
+            e.preventDefault(); // jangan biarkan href="#" ikut lompat/scroll
+            onClick(e);
+        }
+    }
+
     return (
         <a
             href={href}
+            onClick={handleCardClick}
             className={`anime-card group ${className} block  shrink-0 rounded-xl overflow-hidden border border-gray-100 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-950/30`}
         >
             {/* Poster */}
             <div className="relative w-full aspect-[2/3] overflow-hidden bg-blue-950">
                 <img
-                    src={imgTest}
+                    src={image || imgTest}
                     alt={title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
