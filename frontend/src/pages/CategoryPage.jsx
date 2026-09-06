@@ -8,6 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import SideBar from "../components/SidebarCategory.jsx";
 import AnimeCard from "../components/AnimeCard.jsx";
+import { useNavigate } from "react-router-dom";
 
 // Handles anime.genre as either a string ("Action, Comedy") or an array (["Action","Comedy"])
 function getGenres(anime) {
@@ -18,6 +19,7 @@ function getGenres(anime) {
 }
 
 export default function CategoryPage() {
+  const navigate = useNavigate();
   const [animeList, setAnimeList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -26,6 +28,9 @@ export default function CategoryPage() {
   const [sortBy, setSortBy] = useState("latest");
   const [selectedCategory, setSelectedCategory] = useState(null);
 
+    const handleDetail = (animeId) => {
+    navigate(`/anime/${animeId}`);
+  };
   // Ambil data anime dari backend — endpoint sama dengan yang dipakai
   // di halaman Browse, supaya datanya konsisten di seluruh app
   useEffect(() => {
@@ -172,7 +177,8 @@ export default function CategoryPage() {
               </p>
               <div className="card-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
                 {filteredAnime.map((anime) => (
-                  <AnimeCard key={anime.id} {...anime} className="w-full" />
+                  <AnimeCard key={anime.id} {...anime}
+                  onClick={() => handleDetail(anime.id)} className="w-full" />
                 ))}
               </div>
             </>

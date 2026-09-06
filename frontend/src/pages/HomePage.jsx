@@ -18,7 +18,7 @@ import { faBookmark } from "@fortawesome/free-regular-svg-icons";
 import imgTest from "../assets/imgTest.jpg";
 import AnimeCard from "../components/AnimeCard.jsx";
 import { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const seeMoreClass =
   "text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 transition-colors text-sm sm:text-base shrink-0";
@@ -156,13 +156,13 @@ export default function HomePage() {
 
             <div className="category flex flex-wrap justify-center lg:justify-start gap-2 w-full mt-4">
               {categories.map((category) => (
-                <a
+                <Link
                   key={category}
-                  href={`/genre/${category.toLowerCase()}`}
+                  to={`/category?genre=${encodeURIComponent(category)}`}
                   className="border border-sky-400/50 text-sky-100 font-medium text-xs sm:text-sm py-1 px-3 rounded-full hover:bg-sky-500/20 hover:border-sky-300 transition-colors backdrop-blur-sm"
                 >
                   {category}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -267,7 +267,9 @@ export default function HomePage() {
                           {top.rating ?? "-"}
                         </span>
                         <span className="opacity-50">|</span>
-                        <span className="font-medium">{top.episodes ?? "-"} Eps</span>
+                        <span className="font-medium">
+                          {top.episodes ?? "-"} Eps
+                        </span>
                       </div>
                       <h4 className="text-xs sm:text-sm font-normal truncate opacity-90">
                         <FontAwesomeIcon icon={faBuilding} className="mr-1" />{" "}
